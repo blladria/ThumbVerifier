@@ -1,0 +1,46 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel} 
+\usepackage{cite}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{hyperref}
+
+\title{Project Thumb Verifier: Semantic Integrity Verification through Signed Thumbnails in the C2PA Standard}
+\author{Adrià Borrell Lloret}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Motivation}
+In today's digital ecosystem, visual information integrity faces unprecedented challenges due to generative AI and advanced manipulation tools. Although provenance standards such as C2PA (Coalition for Content Provenance and Authenticity) allow for tracking the origin of an image, they present a critical gap: provenance does not guarantee semantic integrity.
+
+The problem lies in the fact that traditional cryptographic signatures (hard linking) are fragile against benign changes such as re-compression, while human validation of thumbnails is not scalable. There is an urgent need for a system that can automatically distinguish between legitimate technical edits and malicious manipulations that alter the meaning of the image, such as the deletion or insertion of objects.
+
+\section{Objectives}
+The primary goal of this project is to develop an image authentication system based on the ``Crypto-ML'' paradigm. The specific objectives include:
+\begin{itemize}
+    \item Utilizing the cryptographically signed low-resolution thumbnail within the C2PA manifest as an immutable ``anchor of truth.''
+    \item Automating the comparison between the high-resolution image ($I_{query}$) and the reference thumbnail ($I_{thumb}$) to detect semantic discrepancies.
+    \item Overcoming the limitations of the ``analog hole'' and recapture attacks through digital forensic analysis.
+\end{itemize}
+
+\section{Related Work}
+The research is supported by three fundamental pillars:
+\begin{enumerate}
+    \item \textbf{C2PA Standard:} The use of JUMBF containers and CBOR serialization to embed signed assertions ($c2pa.thumbnail$) that visually link the manifest to the asset.
+    \item \textbf{Classical Comparison Metrics:} Technical literature demonstrates that metrics such as Mean Squared Error (MSE) and Structural Similarity Index (SSIM) are insufficient for cross-resolution scenarios, as they lack semantic sensitivity and are fragile against misalignment.
+    \item \textbf{Thumbnail-based Integrity:} Previous studies, such as those by Steinebach et al., validate the use of signed thumbnails for integrity verification, suggesting that the thumbnail can serve to calculate descriptors that are robust against benign transformations.
+\end{enumerate}
+
+\section{Proposed Solutions and Ideas}
+To address the detection of semantic changes (inpainting, splicing, face swap), the following approaches are proposed:
+\begin{itemize}
+    \item \textbf{Deep Learning Metrics:} Implementing LPIPS (Learned Perceptual Image Patch Similarity) and CLIP Score to measure global semantic consistency, as these models are more robust to the blurriness inherent in resolution changes.
+    \item \textbf{Asymmetric Siamese Network Architecture:} Designing a network where one branch processes the high-resolution image and another the thumbnail, penalizing only the divergence in shared ``macro'' features.
+    \item \textbf{Recapture Detection:} Investigating the use of Fourier Transforms (FFT) to detect Moiré patterns and pixel grid artifacts that indicate an image has been photographed from a screen (analog hole attack).
+\end{itemize}
+
+\end{document}

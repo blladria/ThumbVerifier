@@ -1,0 +1,14 @@
+# Entornos virtuales
+venv/
+env/
+
+# Archivos compilados y cache
+__pycache__/
+*.pyc
+
+# Archivos temporales de extracción (de tu script utils_c2pa)
+temp_*
+*.tmp
+
+# Archivos de sistema
+.DS_Store

@@ -6,6 +6,7 @@ import sys
 
 # Importar nuestras utilidades
 from utils_c2pa import extract_thumbnail, test_c2patool
+from metrics import calculate_mse, calculate_ssim
 
 brutalist_css = """
 <style>
@@ -184,10 +185,31 @@ p, div, span {
     border: 2px solid black !important;
     border-top: 2px solid white !important;
 }
+
+/* Terminal-style metrics section */
+.terminal-metrics {
+    border: 2px solid black !important;
+    background-color: #000000 !important;
+    color: #00ff00 !important;
+    padding: 1rem !important;
+    font-family: 'Roboto Mono', 'Courier New', monospace !important;
+    font-weight: 400 !important;
+    white-space: pre-wrap !important;
+}
+
+.terminal-warning {
+    border: 2px solid #ffff00 !important;
+    background-color: #1a1a1a !important;
+    color: #ffff00 !important;
+    padding: 1rem !important;
+    font-family: 'Roboto Mono', 'Courier New', monospace !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+}
 </style>
 """
 
-# Inyectar CSS 
+# Inyectar CSS brutalista
 st.markdown(brutalist_css, unsafe_allow_html=True)
 
 # Configuración de la página
@@ -270,21 +292,49 @@ def main():
                 MINIATURA EXTRAÍDA EXITOSAMENTE
                 </div>
                 """, unsafe_allow_html=True)
-            else:
-                st.markdown("""
-                <div class="brutal-error">
-                ESTADO: FALLO<br>
-                NO SE PUDO EXTRAER LA MINIATURA
-                </div>
-                """, unsafe_allow_html=True)
-                st.markdown("""
-                <div class="brutal-info">
-                <strong>CAUSAS PROBABLES:</strong><br>
-                • LA IMAGEN NO TIENE MANIFIESTO C2PA<br>
-                • EL MANIFIESTO NO CONTIENE MINIATURA<br>
-                • FORMATO DE MANIFIESTO NO COMPATIBLE
-                </div>
-                """, unsafe_allow_html=True)
+        
+        # Calcular y mostrar métricas si la miniatura fue extraída exitosamente
+        if thumbnail_img:
+            st.markdown("### DATOS MÉTRICOS // LÍNEA BASE")
+            
+            # Calcular métricas
+            with st.spinner("CALCULANDO MÉTRICAS CLÁSICAS..."):
+                mse_value = calculate_mse(original_img, thumbnail_img)
+                ssim_value = calculate_ssim(original_img, thumbnail_img)
+            
+            # Mostrar resultados en 2 columnas
+            col_mse, col_ssim = st.columns(2)
+            
+            with col_mse:
+                st.metric(
+                    label="MSE (ERROR CUADRÁTICO MEDIO)",
+                    value=f"{mse_value:.2f}",
+                    delta="MÁS ALTO = PEOR SIMILITUD"
+                )
+            
+            with col_ssim:
+                st.metric(
+                    label="SSIM (SIMILITUD ESTRUCTURAL)",
+                    value=f"{ssim_value:.4f}",
+                    delta="MÁS CERCA DE 1.0 = MEJOR SIMILITUD"
+                )
+        
+        # Mostrar mensaje de error si no se pudo extraer la miniatura
+        if not thumbnail_img:
+            st.markdown("""
+            <div class="brutal-error">
+            ESTADO: FALLO<br>
+            NO SE PUDO EXTRAER LA MINIATURA
+            </div>
+            """, unsafe_allow_html=True)
+            st.markdown("""
+            <div class="brutal-info">
+            <strong>CAUSAS PROBABLES:</strong><br>
+            • LA IMAGEN NO TIENE MANIFIESTO C2PA<br>
+            • EL MANIFIESTO NO CONTIENE MINIATURA<br>
+            • FORMATO DE MANIFIESTO NO COMPATIBLE
+            </div>
+            """, unsafe_allow_html=True)
         
         # Limpiar archivo temporal
         try:
@@ -297,7 +347,8 @@ def main():
     st.markdown("""
     <div class="brutal-info">
     <strong>MÓDULO 1: EXTRACCIÓN DE MINIATURA Y UI BASE</strong><br>
-    PRÓXIMOS MÓDULOS: MÉTRICAS CLÁSICAS → CRYPTO-ML (LPIPS/CLIP)
+    <strong>MÓDULO 2: MÉTRICAS CLÁSICAS (MSE/SSIM) - LÍNEA BASE</strong><br>
+    PRÓXIMO MÓDULO: CRYPTO-ML (LPIPS/CLIP)
     </div>
     """, unsafe_allow_html=True)
 
